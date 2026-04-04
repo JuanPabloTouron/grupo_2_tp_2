@@ -82,6 +82,7 @@ typedef enum
 typedef struct
 {
     ao_led_color color;
+    TaskHandle_t htask;
 } ao_led_handle_t;
 
 typedef struct
@@ -97,6 +98,8 @@ typedef struct
 bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* pmsg);
 
 void ao_led_init(ao_led_handle_t* hao, ao_led_color color);
+
+void new_led_ao(ao_led_handle_t* hao);
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus

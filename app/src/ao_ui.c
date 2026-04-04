@@ -86,14 +86,17 @@ static void task_(void *argument)
           {
             case MSG_EVENT_BUTTON_PULSE:
               LOGGER_INFO("Encender LED rojo - UI");
+              new_led_ao(&led_red);
               msg_success = ao_led_send(&led_red, &pevent->msg);
               break;
             case MSG_EVENT_BUTTON_SHORT:
               LOGGER_INFO("Encender LED verde - UI");
+              new_led_ao(&led_green);
               msg_success = ao_led_send(&led_green, &pevent->msg);
               break;
             case MSG_EVENT_BUTTON_LONG:
               LOGGER_INFO("Encender LED azul - UI");
+              new_led_ao(&led_blue);
               msg_success = ao_led_send(&led_blue, &pevent->msg);
               break;
             default:
@@ -116,6 +119,7 @@ static void task_(void *argument)
     	  LOGGER_INFO("Memoria insuficiente.");
       }
     }
+    vTaskDelete(NULL);
   }
 }
 
@@ -152,13 +156,16 @@ void ao_ui_init(ao_ui_handle_t* hao)
   {
 	  LOGGER_INFO("Error al crear la cola - UI");
   }
+}
 
-  BaseType_t status;
-  status = xTaskCreate(task_, "task_ao_ui", 128, hao, tskIDLE_PRIORITY, &hao->htask);
-  while (pdPASS != status)
-  {
-	  LOGGER_INFO("Error al crear la tarea - UI");
-  }
+void new_ao_ui(ao_ui_handle_t* hao)
+{
+	  BaseType_t status;
+	  status = xTaskCreate(task_, "task_ao_ui", 128, hao, tskIDLE_PRIORITY, &hao->htask);
+	  while (pdPASS != status)
+	  {
+		  LOGGER_INFO("Error al crear la tarea - UI");
+	  }
 }
 
 /********************** end of file ******************************************/

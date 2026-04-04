@@ -154,14 +154,17 @@ void task_button(void* argument)
       case BUTTON_TYPE_PULSE:
         LOGGER_INFO("Pulso - BUTTON");
         // enviamos el mensaje a la cola del objeto avtivo UI
+        new_ao_ui(&ui);
         ret = ao_ui_send_event(&ui,MSG_EVENT_BUTTON_PULSE);
         break;
       case BUTTON_TYPE_SHORT:
         LOGGER_INFO("Corto - BUTTON");
+        new_ao_ui(&ui);
         ret = ao_ui_send_event(&ui, MSG_EVENT_BUTTON_SHORT);
         break;
       case BUTTON_TYPE_LONG:
         LOGGER_INFO("Largo - BUTTON");
+        new_ao_ui(&ui);
         ret = ao_ui_send_event(&ui, MSG_EVENT_BUTTON_LONG);
         break;
       default:

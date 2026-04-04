@@ -47,9 +47,11 @@
 
 /********************** macros and definitions *******************************/
 
+#define QUEUE_LENGTH_            (1)
+#define QUEUE_ITEM_SIZE_         (sizeof(ao_event_t*))
+
 #define MEMORY_POOL_NBLOCKS       (10)
 #define MEMORY_POOL_BLOCK_SIZE    (sizeof(ao_event_t))
-
 
 /********************** internal data declaration ****************************/
 //Instanciación del objeto activo de la interfaz de usuario
@@ -60,6 +62,7 @@ ao_led_handle_t led_red;
 ao_led_handle_t led_green;
 ao_led_handle_t led_blue;
 
+QueueHandle_t hqueue;
 
 /********************** internal functions declaration ***********************/
 
@@ -72,6 +75,11 @@ memory_pool_t* const hmp = &memory_pool_;
 /********************** external functions definition ************************/
 void app_init(void)
 {
+  hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
+  while (NULL == hqueue)
+  {
+	  LOGGER_INFO("Error al crear la cola - APP");
+  }
 
   memory_pool_init(hmp, memory_pool_memory_, MEMORY_POOL_NBLOCKS, MEMORY_POOL_BLOCK_SIZE);
 

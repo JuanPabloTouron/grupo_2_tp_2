@@ -15,8 +15,6 @@
 
 /********************** macros and definitions *******************************/
 
-#define QUEUE_LENGTH_            (1)
-#define QUEUE_ITEM_SIZE_         (sizeof(ao_event_t*))
 
 /********************** internal data declaration ****************************/
 
@@ -24,7 +22,7 @@
 /********************** internal functions declaration ***********************/
 
 /********************** internal data definition *****************************/
-static QueueHandle_t hqueue;
+extern QueueHandle_t hqueue;
 /********************** external data definition *****************************/
 
 /********************** internal functions definition ************************/
@@ -68,6 +66,7 @@ static void task_(void *argument)
       }
      pmsg->callback_completed(pmsg);
     }
+    vTaskDelete(NULL);
   }
 }
 
@@ -103,19 +102,19 @@ bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* pmsg)
 void ao_led_init(ao_led_handle_t* hao, ao_led_color color)
 {
   hao->color = color;
+  hao->htask = NULL;
 
-  hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
-  while (NULL == hqueue)
-  {
-	  LOGGER_INFO("Error al crear la cola - LED");
-  }
 
-  BaseType_t status;
-  status = xTaskCreate(task_, "task_ao", 128, NULL, tskIDLE_PRIORITY, NULL);
-  while (pdPASS != status)
-  {
+}
+
+void new_led_ao(ao_led_handle_t* hao)
+{
+	BaseType_t status;
+	status = xTaskCreate(task_, "task_ao", 128, hao, tskIDLE_PRIORITY, &hao->htask);
+	while (pdPASS != status)
+	{
 	  LOGGER_INFO("Error al crear la tarea - LED");
-  }
+	}
 }
 
 /********************** end of file ******************************************/
