@@ -16,7 +16,7 @@
 /********************** macros and definitions *******************************/
 
 #define QUEUE_LENGTH_            (1)
-#define QUEUE_ITEM_SIZE_         (sizeof(ao_led_message_t))
+#define QUEUE_ITEM_SIZE_         (sizeof(ao_led_message_t*))
 
 /********************** internal data declaration ****************************/
 
@@ -40,11 +40,11 @@ static void task_(void *argument)
 
   while (true)
   {
-    ao_led_message_t msg;
+    ao_led_message_t* pmsg;
 
-    if (pdPASS == xQueueReceive(hao->hqueue, &msg, portMAX_DELAY))
+    if (pdPASS == xQueueReceive(hao->hqueue, (void*)&pmsg, portMAX_DELAY))
     {
-      switch (msg.action) {
+      switch (pmsg->action) {
         case AO_LED_MESSAGE_ON:
           LOGGER_INFO("Led %d ON - LED", hao->color);
           HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,SET);
@@ -61,10 +61,10 @@ static void task_(void *argument)
           vTaskDelay(pdMS_TO_TICKS(1000));
           HAL_GPIO_WritePin(LD2_GPIO_Port,LD2_Pin,RESET);
           break;
-
         default:
           break;
       }
+     pmsg->callback_completed(pmsg);
     }
   }
 }
@@ -82,7 +82,7 @@ static void task_(void *argument)
  *
  * @return Booleano que indica éxito.
  */
-bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t pmsg)
+bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* pmsg)
 {
   return (pdPASS == xQueueSend(hao->hqueue, (void*)&pmsg, 0));
 }

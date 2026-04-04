@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Sebastian Bedin <sebabedin@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,8 @@
  * @author : Sebastian Bedin <sebabedin@gmail.com>
  */
 
-#ifndef TASK_LED_H_
-#define TASK_LED_H_
+#ifndef LINKED_LIST_H_
+#define LINKED_LIST_H_
 
 /********************** CPP guard ********************************************/
 #ifdef __cplusplus
@@ -46,58 +46,42 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "main.h"
-#include "cmsis_os.h"
-
 /********************** macros ***********************************************/
 
 /********************** typedef **********************************************/
 
-typedef enum
-{
-  AO_LED_MESSAGE_ON,
-  AO_LED_MESSAGE_OFF,
-  AO_LED_MESSAGE_FLASH,
-} ao_led_action_t;
-
-typedef struct ao_led_message_t ao_led_message_t;
-
-typedef void (*callback_t)(ao_led_message_t* pmsg);
-
-struct ao_led_message_t
-{
-    ao_led_action_t action;
-    callback_t callback_completed;
-};
-
-
-
-typedef enum
-{
-  AO_LED_COLOR_RED,
-  AO_LED_COLOR_GREEN,
-  AO_LED_COLOR_BLUE,
-} ao_led_color;
+typedef struct linked_list_node_s linked_list_node_t;
 
 typedef struct
 {
-    ao_led_color color;
-    QueueHandle_t hqueue;
-    TaskHandle_t htask;
-} ao_led_handle_t;
+    linked_list_node_t* pfirst_node;
+    linked_list_node_t* plast_node;
+    size_t len;
+} linked_list_t;
+
+struct linked_list_node_s
+{
+    void* pdata;
+    linked_list_node_t* pnext_node;
+};
 
 /********************** external data declaration ****************************/
 
 /********************** external functions declaration ***********************/
 
-bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* pmsg);
+void linked_list_init(linked_list_t* hlist);
 
-void ao_led_init(ao_led_handle_t* hao, ao_led_color color);
+void linked_list_node_init(linked_list_node_t* hnode, void* pdata);
+
+linked_list_node_t* linked_list_node_remove(linked_list_t* hlist);
+
+void linked_list_node_add(linked_list_t* hlist, linked_list_node_t* hnode);
 
 /********************** End of CPP guard *************************************/
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* TASK_LED_H_ */
+#endif /* LINKED_LIST_H_ */
 /********************** end of file ******************************************/
+

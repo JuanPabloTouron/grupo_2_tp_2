@@ -43,8 +43,12 @@
 #include "task_button.h"
 #include "ao_led.h"
 #include "ao_ui.h"
+#include "memory_pool.h"
 
 /********************** macros and definitions *******************************/
+
+#define MEMORY_POOL_NBLOCKS       (10)
+#define MEMORY_POOL_BLOCK_SIZE    (sizeof(ao_led_message_t))
 
 
 /********************** internal data declaration ****************************/
@@ -60,12 +64,16 @@ ao_led_handle_t led_blue;
 /********************** internal functions declaration ***********************/
 
 /********************** internal data definition *****************************/
+static memory_pool_t memory_pool_;
+static uint8_t memory_pool_memory_[MEMORY_POOL_SIZE(MEMORY_POOL_NBLOCKS, MEMORY_POOL_BLOCK_SIZE)];
 
 /********************** external data declaration *****************************/
-
+memory_pool_t* const hmp = &memory_pool_;
 /********************** external functions definition ************************/
 void app_init(void)
 {
+
+  memory_pool_init(hmp, memory_pool_memory_, MEMORY_POOL_NBLOCKS, MEMORY_POOL_BLOCK_SIZE);
 
   //Inicialización del objeto activo de la interfaz de usuario
   ao_ui_init(&ui);

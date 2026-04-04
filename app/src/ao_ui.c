@@ -13,6 +13,7 @@
 
 #include "ao_ui.h"
 #include "ao_led.h"
+#include "memory_pool.h"
 
 /********************** macros and definitions *******************************/
 
@@ -26,7 +27,7 @@
 /********************** internal functions declaration ***********************/
 
 /********************** internal data definition *****************************/
-
+uint8_t msg_wip = 0;
 
 
 /********************** external data definition *****************************/
@@ -35,7 +36,19 @@ extern ao_led_handle_t led_red;
 extern ao_led_handle_t led_green;
 extern ao_led_handle_t led_blue;
 
+extern memory_pool_t* const hmp;
+
 /********************** internal functions definition ************************/
+/*	Función de callback */
+static void callback_completed_(ao_led_message_t* pmsg)
+{
+	  memory_pool_block_put(hmp, (void*)pmsg);
+	  LOGGER_INFO("Memoria liberada desde la UI");
+	  msg_wip--;
+	  LOGGER_INFO("Mensajes en proceso: %d", msg_wip);
+}
+
+
 /**
  * @brief Función principal de la interfaz de usuario.
  *
@@ -48,38 +61,59 @@ static void task_(void *argument)
 
   ao_ui_handle_t* hao = (ao_ui_handle_t*)argument;
 
-  ao_led_message_t led_msg;
-  led_msg.action = AO_LED_MESSAGE_OFF;
-  ao_led_send(&led_red, led_msg);
-  ao_led_send(&led_green, led_msg);
-  ao_led_send(&led_blue, led_msg);
 
+  //pled_msg->action = AO_LED_MESSAGE_OFF;
+  //pled_msg->callback_completed = callback_completed_;
+
+  //ao_led_send(&led_red, led_msg);
+  //ao_led_send(&led_green, led_msg);
+  //ao_led_send(&led_blue, led_msg);
 
   while (true)
   {
 
     msg_event_t event_msg;
-
-
     if (pdPASS == xQueueReceive(hao->hqueue, &event_msg, portMAX_DELAY))
     {
-      led_msg.action = AO_LED_MESSAGE_FLASH;
-      switch (event_msg)
+      ao_led_message_t* pled_msg = (ao_led_message_t*) memory_pool_block_get(hmp);
+
+      if (pled_msg != NULL)
       {
-        case MSG_EVENT_BUTTON_PULSE:
-          LOGGER_INFO("Encender LED rojo - UI");
-          ao_led_send(&led_red, led_msg);
-          break;
-        case MSG_EVENT_BUTTON_SHORT:
-          LOGGER_INFO("Encender LED verde - UI");
-          ao_led_send(&led_green, led_msg);
-          break;
-        case MSG_EVENT_BUTTON_LONG:
-          LOGGER_INFO("Encender LED azul - UI");
-          ao_led_send(&led_blue, led_msg);
-          break;
-        default:
-          break;
+          pled_msg->action = AO_LED_MESSAGE_FLASH;
+          pled_msg->callback_completed = callback_completed_;
+          bool msg_success = true;
+          switch (event_msg)
+          {
+            case MSG_EVENT_BUTTON_PULSE:
+              LOGGER_INFO("Encender LED rojo - UI");
+              msg_success = ao_led_send(&led_red, pled_msg);
+              break;
+            case MSG_EVENT_BUTTON_SHORT:
+              LOGGER_INFO("Encender LED verde - UI");
+              msg_success = ao_led_send(&led_green, pled_msg);
+              break;
+            case MSG_EVENT_BUTTON_LONG:
+              LOGGER_INFO("Encender LED azul - UI");
+              msg_success = ao_led_send(&led_blue, pled_msg);
+              break;
+            default:
+              break;
+          }
+          if (msg_success == true)
+          {
+        	  msg_wip++;
+        	  LOGGER_INFO("Mensaje enviado con éxito. Mensajes en proceso: %d",msg_wip);
+
+          }
+          else
+          {
+        	  memory_pool_block_put(hmp,(void*)pled_msg);
+        	  LOGGER_INFO("Memoria liberada desde UI, no pudo enviarse el mensaje.");
+          }
+      }
+      else
+      {
+    	  LOGGER_INFO("Memoria insuficiente.");
       }
     }
   }

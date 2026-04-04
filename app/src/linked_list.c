@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Sebastian Bedin <sebabedin@gmail.com>.
+ * Copyright (c) 2024 Sebastian Bedin <sebabedin@gmail.com>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,72 +32,79 @@
  * @author : Sebastian Bedin <sebabedin@gmail.com>
  */
 
-#ifndef TASK_LED_H_
-#define TASK_LED_H_
-
-/********************** CPP guard ********************************************/
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /********************** inclusions *******************************************/
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "main.h"
-#include "cmsis_os.h"
+#include "linked_list.h"
 
-/********************** macros ***********************************************/
+/********************** macros and definitions *******************************/
 
-/********************** typedef **********************************************/
+/********************** internal data declaration ****************************/
 
-typedef enum
+/********************** internal functions declaration ***********************/
+
+/********************** internal data definition *****************************/
+
+/********************** external data definition *****************************/
+
+/********************** internal functions definition ************************/
+
+/********************** external functions definition ************************/
+
+void linked_list_init(linked_list_t* hlist)
 {
-  AO_LED_MESSAGE_ON,
-  AO_LED_MESSAGE_OFF,
-  AO_LED_MESSAGE_FLASH,
-} ao_led_action_t;
-
-typedef struct ao_led_message_t ao_led_message_t;
-
-typedef void (*callback_t)(ao_led_message_t* pmsg);
-
-struct ao_led_message_t
-{
-    ao_led_action_t action;
-    callback_t callback_completed;
-};
-
-
-
-typedef enum
-{
-  AO_LED_COLOR_RED,
-  AO_LED_COLOR_GREEN,
-  AO_LED_COLOR_BLUE,
-} ao_led_color;
-
-typedef struct
-{
-    ao_led_color color;
-    QueueHandle_t hqueue;
-    TaskHandle_t htask;
-} ao_led_handle_t;
-
-/********************** external data declaration ****************************/
-
-/********************** external functions declaration ***********************/
-
-bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* pmsg);
-
-void ao_led_init(ao_led_handle_t* hao, ao_led_color color);
-
-/********************** End of CPP guard *************************************/
-#ifdef __cplusplus
+  hlist->pfirst_node = NULL;
+  hlist->plast_node = NULL;
+  hlist->len = 0;
 }
-#endif
 
-#endif /* TASK_LED_H_ */
+void linked_list_node_init(linked_list_node_t* hnode, void* pdata)
+{
+  hnode->pdata = pdata;
+  hnode->pnext_node = NULL;
+}
+
+linked_list_node_t* linked_list_node_remove(linked_list_t* hlist)
+{
+  linked_list_node_t* hnode;
+  if(0 == hlist->len)
+  {
+    hnode = NULL;
+  }
+  else if(1 == hlist->len)
+  {
+    hnode = hlist->pfirst_node;
+    hlist->pfirst_node = NULL;
+    hlist->plast_node = NULL;
+    hnode->pnext_node = NULL;
+    hlist->len--;
+  }
+  else
+  {
+    hnode = hlist->pfirst_node;
+    hlist->pfirst_node = hnode->pnext_node;
+    hnode->pnext_node = NULL;
+    hlist->len--;
+  }
+  return hnode;
+}
+
+void linked_list_node_add(linked_list_t* hlist, linked_list_node_t* hnode)
+{
+  if(0 == hlist->len)
+  {
+    hlist->pfirst_node = hnode;
+    hlist->plast_node = hnode;
+  }
+  else
+  {
+    hlist->plast_node->pnext_node = hnode;
+    hlist->plast_node = hnode;
+  }
+  hlist->len++;
+}
+
 /********************** end of file ******************************************/
