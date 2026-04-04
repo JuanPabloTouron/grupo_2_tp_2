@@ -69,11 +69,11 @@ static void task_(void *argument)
   //ao_led_send(&led_green, led_msg);
   //ao_led_send(&led_blue, led_msg);
 
-  while (true)
-  {
+  //while (true)
+  //{
 
     msg_event_t event_msg;
-    if (pdPASS == xQueueReceive(hao->hqueue, &event_msg, portMAX_DELAY))
+    while (pdPASS == xQueueReceive(hao->hqueue, &event_msg, portMAX_DELAY))
     {
       ao_event_t* pevent = (ao_event_t*) memory_pool_block_get(hmp);
 
@@ -120,7 +120,7 @@ static void task_(void *argument)
       }
     }
     vTaskDelete(NULL);
-  }
+  //}
 }
 
 /********************** external functions PULSEdefinition ************************/

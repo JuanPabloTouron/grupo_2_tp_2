@@ -36,11 +36,11 @@ extern QueueHandle_t hqueue;
 static void task_(void *argument)
 {
 
-  while (true)
-  {
+  //while (true)
+  //{
     ao_event_t* pevent;
 
-    if (pdPASS == xQueueReceive(hqueue, &pevent, portMAX_DELAY))
+    while (pdPASS == xQueueReceive(hqueue, &pevent, portMAX_DELAY))
     {
       ao_led_handle_t* hao = pevent->hao;
       ao_led_message_t* pmsg = &pevent->msg;
@@ -67,7 +67,7 @@ static void task_(void *argument)
      pmsg->callback_completed(pmsg);
     }
     vTaskDelete(NULL);
-  }
+  //}
 }
 
 /********************** external functions definition ************************/
