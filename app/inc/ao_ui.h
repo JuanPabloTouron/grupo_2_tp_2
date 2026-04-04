@@ -33,7 +33,7 @@ typedef struct
 /********************** external data declaration ****************************/
 
 /********************** external functions declaration ***********************/
-static void callback_completed(ao_led_message_t* pmsg);
+void callback_completed(ao_led_message_t* pmsg);
 
 bool ao_ui_send_event(ao_ui_handle_t* hao, msg_event_t msg);
 

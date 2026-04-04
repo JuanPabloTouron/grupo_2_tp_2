@@ -82,9 +82,13 @@ typedef enum
 typedef struct
 {
     ao_led_color color;
-    QueueHandle_t hqueue;
-    TaskHandle_t htask;
 } ao_led_handle_t;
+
+typedef struct
+{
+    ao_led_message_t msg;
+    ao_led_handle_t* hao;
+} ao_event_t;
 
 /********************** external data declaration ****************************/
 

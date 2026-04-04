@@ -48,7 +48,7 @@
 /********************** macros and definitions *******************************/
 
 #define MEMORY_POOL_NBLOCKS       (10)
-#define MEMORY_POOL_BLOCK_SIZE    (sizeof(ao_led_message_t))
+#define MEMORY_POOL_BLOCK_SIZE    (sizeof(ao_event_t))
 
 
 /********************** internal data declaration ****************************/

@@ -75,26 +75,26 @@ static void task_(void *argument)
     msg_event_t event_msg;
     if (pdPASS == xQueueReceive(hao->hqueue, &event_msg, portMAX_DELAY))
     {
-      ao_led_message_t* pled_msg = (ao_led_message_t*) memory_pool_block_get(hmp);
+      ao_event_t* pevent = (ao_event_t*) memory_pool_block_get(hmp);
 
-      if (pled_msg != NULL)
+      if (pevent != NULL)
       {
-          pled_msg->action = AO_LED_MESSAGE_FLASH;
-          pled_msg->callback_completed = callback_completed_;
+    	  pevent->msg.action = AO_LED_MESSAGE_FLASH;
+    	  pevent->msg.callback_completed = callback_completed_;
           bool msg_success = true;
           switch (event_msg)
           {
             case MSG_EVENT_BUTTON_PULSE:
               LOGGER_INFO("Encender LED rojo - UI");
-              msg_success = ao_led_send(&led_red, pled_msg);
+              msg_success = ao_led_send(&led_red, &pevent->msg);
               break;
             case MSG_EVENT_BUTTON_SHORT:
               LOGGER_INFO("Encender LED verde - UI");
-              msg_success = ao_led_send(&led_green, pled_msg);
+              msg_success = ao_led_send(&led_green, &pevent->msg);
               break;
             case MSG_EVENT_BUTTON_LONG:
               LOGGER_INFO("Encender LED azul - UI");
-              msg_success = ao_led_send(&led_blue, pled_msg);
+              msg_success = ao_led_send(&led_blue, &pevent->msg);
               break;
             default:
               break;
@@ -107,7 +107,7 @@ static void task_(void *argument)
           }
           else
           {
-        	  memory_pool_block_put(hmp,(void*)pled_msg);
+        	  memory_pool_block_put(hmp,(void*)pevent);
         	  LOGGER_INFO("Memoria liberada desde UI, no pudo enviarse el mensaje.");
           }
       }
