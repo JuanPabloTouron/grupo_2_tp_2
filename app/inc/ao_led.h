@@ -66,8 +66,8 @@ typedef void (*callback_t)(ao_led_message_t* pmsg);
 
 struct ao_led_message_t
 {
-    ao_led_action_t action;
-    callback_t callback_completed;
+    ao_led_action_t action; //Acción a realizar
+    callback_t callback_completed; //Puntero a la función de callback
 };
 
 

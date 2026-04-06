@@ -153,8 +153,9 @@ void task_button(void* argument)
         break;
       case BUTTON_TYPE_PULSE:
         LOGGER_INFO("Pulso - BUTTON");
-        // enviamos el mensaje a la cola del objeto avtivo UI
+        //Llamamos a new_ao_ui que crea la tarea de la UI (repite en los otros casos)
         new_ao_ui(&ui);
+        //Enviamos mensaje a la cola de la UI (repite en los otros casos)
         ret = ao_ui_send_event(&ui,MSG_EVENT_BUTTON_PULSE);
         break;
       case BUTTON_TYPE_SHORT:

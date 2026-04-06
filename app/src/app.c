@@ -46,7 +46,6 @@
 #include "memory_pool.h"
 
 /********************** macros and definitions *******************************/
-
 #define QUEUE_LENGTH_            (1)
 #define QUEUE_ITEM_SIZE_         (sizeof(ao_event_t*))
 
@@ -62,11 +61,13 @@ ao_led_handle_t led_red;
 ao_led_handle_t led_green;
 ao_led_handle_t led_blue;
 
+//Instanciación de la cola que será utilizada para pasar mensajes entre OAs
 QueueHandle_t hqueue;
 
 /********************** internal functions declaration ***********************/
 
 /********************** internal data definition *****************************/
+//Instaciación de los memory pools
 static memory_pool_t memory_pool_;
 static uint8_t memory_pool_memory_[MEMORY_POOL_SIZE(MEMORY_POOL_NBLOCKS, MEMORY_POOL_BLOCK_SIZE)];
 
@@ -75,12 +76,14 @@ memory_pool_t* const hmp = &memory_pool_;
 /********************** external functions definition ************************/
 void app_init(void)
 {
+  //Creación de la cola
   hqueue = xQueueCreate(QUEUE_LENGTH_, QUEUE_ITEM_SIZE_);
   while (NULL == hqueue)
   {
 	  LOGGER_INFO("Error al crear la cola - APP");
   }
 
+  //Creación del memory pool
   memory_pool_init(hmp, memory_pool_memory_, MEMORY_POOL_NBLOCKS, MEMORY_POOL_BLOCK_SIZE);
 
   //Inicialización del objeto activo de la interfaz de usuario

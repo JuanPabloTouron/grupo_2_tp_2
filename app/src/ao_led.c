@@ -31,17 +31,16 @@ extern QueueHandle_t hqueue;
  *
  * Recibe un handler a un objeto activo de LED, lee la cola propia
  * del OA. Si hay un mensaje, ejecuta la acción correspondiente
- * con el LED.
+ * con el LED. Repite hasta que no haya más mensajes.
+ * En ese momento, destruye la tarea.
  */
 static void task_(void *argument)
 {
-
-  //while (true)
-  //{
     ao_event_t* pevent;
 
     while (pdPASS == xQueueReceive(hqueue, &pevent, portMAX_DELAY))
     {
+      //Si hay un evento por atender, leo su contenido
       ao_led_handle_t* hao = pevent->hao;
       ao_led_message_t* pmsg = &pevent->msg;
       switch (pmsg->action) {
@@ -64,22 +63,23 @@ static void task_(void *argument)
         default:
           break;
       }
+      //Una vez atendido el evento, ejecuto la función de callback
      pmsg->callback_completed(pmsg);
     }
+    //Si no hay más eventos por atender, destruyo la tarea para liberar espacio
     vTaskDelete(NULL);
-  //}
 }
 
 /********************** external functions definition ************************/
 /**
  * @brief Función para enviar mensajes a la cola del LED.
  *
- * Recibe un handler a un objeto activo de LED, y un mensaje.
- * Lo envía a la cola del OA. Devuelve true si pudo
- * hacerlo y false si no.
+ * Recibe un handler a un objeto activo de LED, y un puntero
+ * al mensaje. Lo envía a la cola del OA en un objeto evento.
+ * Devuelve true si pudo hacerlo y false si no.
  *
  * @param hao Handler al objeto activo.
- * @param msg Mensaje a enviar.
+ * @param pmsg Puntero al mensaje a enviar.
  *
  * @return Booleano que indica éxito.
  */
@@ -94,7 +94,6 @@ bool ao_led_send(ao_led_handle_t* hao, ao_led_message_t* pmsg)
  * @brief Función de inicialización del OA de LED.
  *
  * Recibe un handler a un objeto activo de LED y un color.
- * Le crea una cola y le asigna un handler a su tarea
  *
  * @param hao Handler al objeto activo.
  * @param color Color del LED.
@@ -103,10 +102,16 @@ void ao_led_init(ao_led_handle_t* hao, ao_led_color color)
 {
   hao->color = color;
   hao->htask = NULL;
-
-
 }
 
+/**
+ * @brief Función de creación de la tarea del LED.
+ *
+ * Recibe un handler a un objeto activo de LED. Crea la tarea
+ * y la asigna al objeto activo correspondiente.
+ *
+ * @param hao Handler al objeto activo.
+ */
 void new_led_ao(ao_led_handle_t* hao)
 {
 	BaseType_t status;
@@ -116,5 +121,4 @@ void new_led_ao(ao_led_handle_t* hao)
 	  LOGGER_INFO("Error al crear la tarea - LED");
 	}
 }
-
 /********************** end of file ******************************************/
