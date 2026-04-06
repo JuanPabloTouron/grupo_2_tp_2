@@ -69,7 +69,7 @@ static void task_(void *argument)
     ao_ui_handle_t* hao = (ao_ui_handle_t*)argument;
 
     msg_event_t event_msg;
-    while (pdPASS == xQueueReceive(hao->hqueue, &event_msg, portMAX_DELAY))
+    if (pdPASS == xQueueReceive(hao->hqueue, &event_msg, portMAX_DELAY))
     {
       //Si hay un mensaje por enviar, reserva un bloque de memoria
       ao_event_t* pevent = (ao_event_t*) memory_pool_block_get(hmp);

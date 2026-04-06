@@ -38,7 +38,7 @@ static void task_(void *argument)
 {
     ao_event_t* pevent;
 
-    while (pdPASS == xQueueReceive(hqueue, &pevent, portMAX_DELAY))
+    if (pdPASS == xQueueReceive(hqueue, &pevent, portMAX_DELAY))
     {
       //Si hay un evento por atender, leo su contenido
       ao_led_handle_t* hao = pevent->hao;
@@ -64,7 +64,7 @@ static void task_(void *argument)
           break;
       }
       //Una vez atendido el evento, ejecuto la función de callback
-     pmsg->callback_completed(pmsg);
+      pmsg->callback_completed(pmsg);
     }
     //Si no hay más eventos por atender, destruyo la tarea para liberar espacio
     vTaskDelete(NULL);
